@@ -160,17 +160,6 @@ class redblacktree
         std::cout << p -> data << " ";
     }
 
-    node *find(node *p, int &key)
-    {
-        if(p == NULL || p -> data == key)
-            return p;
-            
-        if(key < p -> data)
-            return find(p -> link[0], key);
-        else
-            return find(p -> link[1], key);
-    }
-
     void print(const std::string& line, const node* p, bool left)
     {
         if(p == NULL)
@@ -332,10 +321,19 @@ class redblacktree
             }
         }
 
-        node *find(int key)
+        node* find(int key)
         {
-            node *p = makeNode(key);
-            return find(p, key);
+            node *p = root;
+            while(p != NULL)
+            {
+                if(p -> data == key)
+                    return p;
+                else if(key < p -> data)
+                    p = p -> link[0];
+                else
+                    p = p -> link[1];
+            }
+            return p;
         }
 
         void printInOrder()
@@ -379,7 +377,7 @@ int main()
             tree -> del(input("input number to delete", 0, 1000));
         else if(t == 2)
         {
-            node* p = tree -> find(input("input number to find", 0, 1000));
+            node *p = tree -> find(input("input number to find", 0, 1000));
             if(p != NULL)
                 std::cout << p -> data;
             else
@@ -388,6 +386,8 @@ int main()
         }
         else if(t == 3)
         {
+            system("cls");
+            std::cout << "Tree:\n";
             tree -> print();
             getch();
         }
