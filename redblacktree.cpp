@@ -324,11 +324,9 @@ class redblacktree
         node* find(int key)
         {
             node *p = root;
-            while(p != NULL)
+            while(p != NULL && p -> data != key)
             {
-                if(p -> data == key)
-                    return p;
-                else if(key < p -> data)
+                if(key < p -> data)
                     p = p -> link[0];
                 else
                     p = p -> link[1];
