@@ -160,6 +160,17 @@ class redblacktree
         std::cout << p -> data << " ";
     }
 
+    node *find(node *p, int &key)
+    {
+        if(p == NULL || p -> data == key)
+            return p;
+            
+        if(key < p -> data)
+            return find(p -> link[0], key);
+        else
+            return find(p -> link[1], key);
+    }
+
     void print(const std::string& line, const node* p, bool left)
     {
         if(p == NULL)
@@ -321,6 +332,12 @@ class redblacktree
             }
         }
 
+        node *find(int key)
+        {
+            node *p = makeNode(key);
+            return find(p, key);
+        }
+
         void printInOrder()
         {
             inOrder(root);
@@ -354,7 +371,7 @@ int main()
     while(true)
     {
         system("cls");
-        t = menu("1. add()\n2. del()\n3. printAsTree()\n4. printAsArray()\n5. addManyNumbers()\n");
+        t = menu("1. add()\n2. del()\n3. find()\n4. printAsTree()\n5. printAsArray()\n6. addManyNumbers()\n");
 
         if(t == 0)
             tree -> add(input("input number to add", 0, 1000));
@@ -362,15 +379,24 @@ int main()
             tree -> del(input("input number to delete", 0, 1000));
         else if(t == 2)
         {
-            tree -> print();
+            node* p = tree -> find(input("input number to find", 0, 1000));
+            if(p != NULL)
+                std::cout << p -> data;
+            else
+                std::cout << "Not found";
             getch();
         }
         else if(t == 3)
         {
-            tree -> printInOrder();
+            tree -> print();
             getch();
         }
         else if(t == 4)
+        {
+            tree -> printInOrder();
+            getch();
+        }
+        else if(t == 5)
         {
             //рандомно запонить дерево
             int amount = input("How many numbers to add? ", 0, 100);
