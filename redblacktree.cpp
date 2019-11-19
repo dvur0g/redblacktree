@@ -160,21 +160,21 @@ class redblacktree
         std::cout << p -> data << " ";
     }
 
-    void print(const std::string& line, const node* p, bool left)
+    void print(const std::string& line, const node* p, bool right)
     {
         if(p == NULL)
             return;
             
         std::cout << line;
 
-        std::cout << (left ? leftLine : rightLine);
+        std::cout << (right ? rightLine : leftLine);
         if(p -> red)
             SetConsoleTextAttribute(hConsole, colorRed);
         std::cout << p -> data << "\n";
         SetConsoleTextAttribute(hConsole, colorDefault);
 
-        print(line + (left ? continueLine : "    "), p -> link[1], true);
-        print(line + (left ? continueLine : "    "), p -> link[0], false);
+        print(line + (right ? continueLine : "    "), p -> link[1], true);
+        print(line + (right ? continueLine : "    "), p -> link[0], false);
     }
 
     std::string leftLine = "";
@@ -184,8 +184,8 @@ class redblacktree
     public:
         void fillLines()
         {
-            leftLine.push_back(char(195));//├
-            rightLine.push_back(char(192));//└
+            rightLine.push_back(char(195));//├
+            leftLine.push_back(char(192));//└
             continueLine.push_back(char(179));//│
 
             for(int i = 0; i < 2; ++i)
@@ -199,11 +199,7 @@ class redblacktree
         void add(int data)
         {
             if(root == NULL) 
-            {
                 root = makeNode(data);
-                if(root == NULL)
-                    return;
-            }
             
             node head = {0};
             node *g, *t, *p, *q;
@@ -221,9 +217,9 @@ class redblacktree
                 }
                 else if(isRed(q -> link[0]) && isRed(q -> link[1])) 
                 {
-                    q -> red = 1;
-                    q -> link[0] -> red = 0;
-                    q -> link[1] -> red = 0;
+                    q -> red = true;
+                    q -> link[0] -> red = false;
+                    q -> link[1] -> red = false;
                 }
                 
                 if(isRed(q) && isRed(p)) 
@@ -254,71 +250,71 @@ class redblacktree
 
         void del(int data)
         {
-            if(root != NULL) 
-            {
-                node head = {0};
-                node *q, *p, *g, *f = NULL;
-                int dir = 1;
-                
-                q = &head;
-                g = p = NULL;
-                q -> link[1] = root;
-            
-                while(q -> link[dir] != NULL) 
-                {
-                    int last = dir;
-    
-                    g = p, p = q;
-                    q = q -> link[dir];
-                    dir = q -> data < data;
-                
-                    if(q -> data == data)
-                        f = q;
-                
-                    if (!isRed(q) && !isRed(q -> link[dir])) 
-                    {
-                        if(isRed(q -> link[!dir]))
-                            p = p -> link[last] = rotateOnce(q, dir);
-                        else if(!isRed(q -> link[!dir])) 
-                        {
-                            struct node *s = p -> link[!last];
+            if(root == NULL) 
+                return;
 
-                            if (s != NULL) 
+            node head = {0};
+            node *q, *p, *g, *f = NULL;
+            int dir = 1;
+
+            q = &head;
+            g = p = NULL;
+            q -> link[1] = root;
+            
+            while(q -> link[dir] != NULL) 
+            {
+                int last = dir;
+    
+                g = p, p = q;
+                q = q -> link[dir];
+                dir = q -> data < data;
+                
+                if(q -> data == data)
+                    f = q;
+                
+                if (!isRed(q) && !isRed(q -> link[dir])) 
+                {
+                    if(isRed(q -> link[!dir]))
+                        p = p -> link[last] = rotateOnce(q, dir);
+                    else if(!isRed(q -> link[!dir])) 
+                    {
+                        node *s = p -> link[!last];
+
+                        if (s != NULL) 
+                        {
+                            if(!isRed(s -> link[!last]) && !isRed(s -> link[last])) 
                             {
-                                if(!isRed(s -> link[!last]) && !isRed(s -> link[last])) 
-                                {
-                                    p -> red = 0;
-                                    s -> red = 1;
-                                    q -> red = 1;
-                                }
-                                else 
-                                {
-                                    int dir2 = g -> link[1] == p;
+                                p -> red = false;
+                                s -> red = true;
+                                q -> red = true;
+                            }
+                            else 
+                            {
+                                int dir2 = g -> link[1] == p;
                         
-                                    if(isRed(s -> link[last]))
-                                        g -> link[dir2] = rotateTwice(p, last);
-                                    else if(isRed(s -> link[!last]))
-                                        g -> link[dir2] = rotateOnce(p, last);
-                        
-                                    q -> red = g -> link[dir2] -> red = 1;
-                                    g -> link[dir2] -> link[0] -> red = 0;
-                                    g -> link[dir2] -> link[1] -> red = 0;
-                                }
+                                if(isRed(s -> link[last]))
+                                    g -> link[dir2] = rotateTwice(p, last);
+                                else if(isRed(s -> link[!last]))
+                                    g -> link[dir2] = rotateOnce(p, last);
+                    
+                                q -> red = g -> link[dir2] -> red = true;
+                                g -> link[dir2] -> link[0] -> red = false;
+                                g -> link[dir2] -> link[1] -> red = false;
                             }
                         }
                     }
                 }
-                
-                if(f != NULL) 
-                {
-                    f -> data = q -> data;
-                    p -> link[p -> link[1] == q] = q -> link[q -> link[0] == NULL];
-                    delete q;
-                }
-                root = head.link[1];
-                if(root != NULL)
-                    root -> red = 0;
             }
+                
+            if(f != NULL) 
+            {
+                f -> data = q -> data;
+                p -> link[p -> link[1] == q] = q -> link[q -> link[0] == NULL];
+                delete q;
+            }
+            root = head.link[1];
+            if(root != NULL)
+                root -> red = 0;
         }
 
         node* find(int key)
